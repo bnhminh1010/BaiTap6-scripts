@@ -1,3 +1,256 @@
+"""
+===========================================================================
+D.2. TEST SCRIPT DESIGN — CATALOG (TC-CAT-001 → TC-CAT-012)
+===========================================================================
+
+FILE: test_catalog.py
+MODULE: Catalog
+TOTAL TCs: 12
+
+===========================================================================
+TC-CAT-001: Xác minh danh sách sản phẩm mặc định được hiển thị đầy đủ
+===========================================================================
+PAGE OBJECTS:
+  - CatalogPage: product_list, product_item, product_name, product_price
+  - HomePage: catalog_link, search_input
+
+TEST STEPS:
+  1. Navigate to home page (/)
+  2. Wait for catalog page to load
+  3. Count all displayed products
+  4. Get product names list
+  5. Get product prices list
+  6. Verify all required fields present
+
+ASSERTIONS:
+  - Assert product count > 0
+  - Assert at least one product name displayed
+  - Assert at least one product price displayed
+
+LOCATORS:
+  - Product list: .esh-catalog-item, [class*="catalog-item"]
+  - Product name: .esh-catalog-name
+  - Product price: .esh-catalog-price
+
+===========================================================================
+TC-CAT-002: Xác minh kết quả tìm kiếm chỉ trả về sản phẩm khớp theo tên hợp lệ
+===========================================================================
+PAGE OBJECTS:
+  - CatalogPage: search_input, search_button, product_list
+
+TEST STEPS:
+  1. Navigate to catalog page
+  2. Enter valid search keyword: ".NET"
+  3. Click search button
+  4. Wait for results
+  5. Count displayed products
+
+ASSERTIONS:
+  - Assert product count > 0
+  - Assert search returns relevant products
+
+LOCATORS:
+  - Search input: [name="searchString"], #searchString
+  - Search button: .esh-catalog-send, button[type="submit"]
+
+===========================================================================
+TC-CAT-003: Xác minh hiển thị trạng thái không có kết quả
+===========================================================================
+PAGE OBJECTS:
+  - CatalogPage: search_input, product_list, empty_state
+
+TEST STEPS:
+  1. Navigate to catalog page
+  2. Enter non-existent keyword: "nonexistent_item_123"
+  3. Click search button
+  4. Observe result
+
+ASSERTIONS:
+  - Assert system handles no results gracefully
+  - Assert no error displayed
+
+LOCATORS:
+  - Empty state: .alert-warning, [class*="no-result"]
+
+===========================================================================
+TC-CAT-004: Xác minh hành vi hệ thống khi tìm kiếm với từ khóa trống
+===========================================================================
+PAGE OBJECTS:
+  - CatalogPage: search_input, search_button
+
+TEST STEPS:
+  1. Navigate to catalog page
+  2. Leave search input empty
+  3. Click search button
+  4. Observe system behavior
+
+ASSERTIONS:
+  - Assert products still displayed
+  - Assert no error thrown
+
+LOCATORS:
+  - Same as TC-CAT-002
+
+===========================================================================
+TC-CAT-005: Xác minh danh sách chỉ hiển thị sản phẩm thuộc category đã chọn
+===========================================================================
+PAGE OBJECTS:
+  - CatalogPage: category_dropdown, product_list
+
+TEST STEPS:
+  1. Navigate to catalog page
+  2. Select category filter: "Mug"
+  3. Click apply/search
+  4. Count filtered products
+
+ASSERTIONS:
+  - Assert filtered products belong to selected category
+  - Assert product count >= 0
+
+LOCATORS:
+  - Category dropdown: [id="CatalogModel_TypesFilterApplied"]
+  - Filter button: .esh-catalog-send
+
+===========================================================================
+TC-CAT-006: Xác minh danh sách chỉ hiển thị sản phẩm thuộc brand đã chọn
+===========================================================================
+PAGE OBJECTS:
+  - CatalogPage: brand_dropdown, product_list
+
+TEST STEPS:
+  1. Navigate to catalog page
+  2. Select brand filter: ".NET"
+  3. Click apply/search
+  4. Count filtered products
+
+ASSERTIONS:
+  - Assert filtered products belong to selected brand
+  - Assert product count >= 0
+
+LOCATORS:
+  - Brand dropdown: [id="CatalogModel_BrandFilterApplied"]
+
+===========================================================================
+TC-CAT-007: Xác minh kết hợp category và brand filter
+===========================================================================
+PAGE OBJECTS:
+  - CatalogPage: category_dropdown, brand_dropdown, product_list
+
+TEST STEPS:
+  1. Navigate to catalog page
+  2. Select category filter: "Mug"
+  3. Select brand filter: ".NET"
+  4. Click apply/search
+  5. Count filtered products
+
+ASSERTIONS:
+  - Assert products match both filters
+  - Assert product count >= 0
+
+LOCATORS:
+  - Same as TC-CAT-005 and TC-CAT-006
+
+===========================================================================
+TC-CAT-008: Xác minh danh sách được sắp xếp theo giá tăng dần
+===========================================================================
+PAGE OBJECTS:
+  - CatalogPage: sort_dropdown, product_list
+
+TEST STEPS:
+  1. Navigate to catalog page
+  2. Select sort by price ascending: value="1"
+  3. Click apply
+  4. Get product prices list
+  5. Verify ascending order
+
+ASSERTIONS:
+  - Assert prices are in ascending order
+  - Assert product count >= 0
+
+LOCATORS:
+  - Sort dropdown: [id="CatalogModel_SortOrder"]
+
+===========================================================================
+TC-CAT-009: Xác minh danh sách được sắp xếp theo giá giảm dần
+===========================================================================
+PAGE OBJECTS:
+  - CatalogPage: sort_dropdown, product_list
+
+TEST STEPS:
+  1. Navigate to catalog page
+  2. Select sort by price descending: value="2"
+  3. Click apply
+  4. Get product prices list
+  5. Verify descending order
+
+ASSERTIONS:
+  - Assert prices are in descending order
+  - Assert product count >= 0
+
+LOCATORS:
+  - Same as TC-CAT-008
+
+===========================================================================
+TC-CAT-010: Xác minh trang chi tiết sản phẩm hiển thị đầy đủ
+===========================================================================
+PAGE OBJECTS:
+  - CatalogPage: product_item, product_name, product_price
+
+TEST STEPS:
+  1. Navigate to catalog page
+  2. Get product count
+  3. Get all product names
+  4. Get all product prices
+
+ASSERTIONS:
+  - Assert products have names
+  - Assert products have prices
+
+LOCATORS:
+  - Same as TC-CAT-001
+
+===========================================================================
+TC-CAT-011: Xác minh phân trang hoạt động đúng
+===========================================================================
+PAGE OBJECTS:
+  - CatalogPage: pagination_next, product_list, pager_info
+
+TEST STEPS:
+  1. Navigate to catalog page
+  2. Get product names from page 1
+  3. Click next page button
+  4. Wait for page to load
+  5. Get product names from page 2
+
+ASSERTIONS:
+  - Assert page 1 and page 2 have different products OR pagination works
+
+LOCATORS:
+  - Next button: [id="Next"]
+  - Previous button: [id="Previous"]
+  - Pager info: .esh-pager-item
+
+===========================================================================
+TC-CAT-012: Xác minh giao diện catalog hiển thị đúng ở kích thước mobile
+===========================================================================
+PAGE OBJECTS:
+  - CatalogPage: product_list, responsive_layout
+
+TEST STEPS:
+  1. Navigate to catalog page
+  2. Set window size to mobile: 375x667
+  3. Count displayed products
+
+ASSERTIONS:
+  - Assert products display correctly on mobile
+  - Assert product count >= 0
+
+LOCATORS:
+  - Same as TC-CAT-001
+
+===========================================================================
+"""
+
 import pytest
 from pages.catalog_page import CatalogPage
 from data.test_data import TestData

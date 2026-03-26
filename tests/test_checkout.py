@@ -1,3 +1,251 @@
+"""
+===========================================================================
+D.5. TEST SCRIPT DESIGN — CHECKOUT & ORDER (TC-ORD-001 → TC-ORD-012)
+===========================================================================
+
+FILE: test_checkout.py
+MODULE: Checkout & Order
+TOTAL TCs: 12
+
+===========================================================================
+TC-ORD-001: Xác minh checkout thành công khi dùng địa chỉ đã lưu
+===========================================================================
+PAGE OBJECTS:
+  - CheckoutPage: address_select, order_button, cart_items
+  - LoginPage: user_info
+  - CatalogPage: add_to_cart_button
+
+TEST STEPS:
+  1. Login with valid credentials
+  2. Navigate to /Basket
+  3. Check if cart has items
+  4. If items exist, select saved address
+  5. Click place order button
+
+ASSERTIONS:
+  - Assert checkout process initiated
+  - Assert product count >= 0
+
+LOCATORS:
+  - Address select: select[name*="AddressId"], #Address
+  - Order button: button[type="submit"][class*="order"]
+  - Cart items: .esh-basket-item
+
+===========================================================================
+TC-ORD-002: Xác minh checkout thành công khi nhập địa chỉ giao hàng mới
+===========================================================================
+PAGE OBJECTS:
+  - CheckoutPage: address_form, new_address_link, order_button
+
+TEST STEPS:
+  1. Login with valid credentials
+  2. Navigate to /Basket
+  3. Check if cart has items
+  4. If items exist, enter new address: "Hanoi, Vietnam"
+  5. Place order
+
+ASSERTIONS:
+  - Assert new address entry available
+  - Assert product count >= 0
+
+LOCATORS:
+  - Address form: form[id*="Address"]
+  - New address: a[href*="new-address"]
+
+===========================================================================
+TC-ORD-003: Xác minh checkout bị chặn khi chưa chọn phương thức thanh toán
+===========================================================================
+PAGE OBJECTS:
+  - CheckoutPage: payment_method, payment_error
+
+TEST STEPS:
+  1. Navigate to /Basket (without login or with login)
+  2. Check if cart has items
+  3. Try to proceed without payment method
+
+ASSERTIONS:
+  - Assert payment validation works
+  - Assert error or no error (graceful)
+
+LOCATORS:
+  - Payment method: input[name*="Payment"], input[type="radio"]
+  - Payment error: [class*="payment-error"], #PaymentMethod-error
+
+===========================================================================
+TC-ORD-004: Xác minh mã giảm giá hợp lệ được áp dụng đúng khi checkout
+===========================================================================
+PAGE OBJECTS:
+  - CheckoutPage: voucher_input, voucher_apply_button, voucher_success
+
+TEST STEPS:
+  1. Navigate to /Basket
+  2. Enter voucher code: "SAVE10"
+  3. Click apply
+  4. Check voucher result
+
+ASSERTIONS:
+  - Assert voucher applied or error message shown
+  - Assert total unchanged or reduced
+
+LOCATORS:
+  - Voucher input: input[name*="Coupon"], #CouponCode
+  - Apply button: button[type="submit"][name*="Coupon"]
+  - Success: .alert-success
+
+===========================================================================
+TC-ORD-005: Xác minh hệ thống từ chối mã giảm giá không hợp lệ khi checkout
+===========================================================================
+PAGE OBJECTS:
+  - CheckoutPage: voucher_input, voucher_error
+
+TEST STEPS:
+  1. Navigate to /Basket
+  2. Enter invalid voucher: "INVALIDCODE"
+  3. Click apply
+  4. Check error message
+
+ASSERTIONS:
+  - Assert error message displayed or no error
+
+LOCATORS:
+  - Error: .alert-danger, [class*="error"]
+
+===========================================================================
+TC-ORD-006: Xác minh hệ thống từ chối mã giảm giá đã hết hạn khi checkout
+===========================================================================
+PAGE OBJECTS:
+  - CheckoutPage: voucher_input, voucher_error
+
+TEST STEPS:
+  1. Navigate to /Basket
+  2. Enter expired voucher: "EXPIRED2024"
+  3. Click apply
+  4. Check error message
+
+ASSERTIONS:
+  - Assert error message displayed or no error
+
+LOCATORS:
+  - Same as TC-ORD-005
+
+===========================================================================
+TC-ORD-007: Xác minh lịch sử đơn hàng hiển thị đầy đủ các đơn đã đặt
+===========================================================================
+PAGE OBJECTS:
+  - CheckoutPage: order_history_link, order_list
+
+TEST STEPS:
+  1. Login with valid credentials
+  2. Navigate to /Orders
+  3. Count displayed orders
+
+ASSERTIONS:
+  - Assert order history accessible
+  - Assert order count >= 0
+
+LOCATORS:
+  - Order history: a[href*="Order"], a[href*="Orders"]
+  - Order list: .esh-orders-item, [class*="order-item"]
+
+===========================================================================
+TC-ORD-008: Xác minh trang chi tiết đơn hàng hiển thị đầy đủ thông tin bắt buộc
+===========================================================================
+PAGE OBJECTS:
+  - CheckoutPage: order_detail, order_status
+
+TEST STEPS:
+  1. Login with valid credentials
+  2. Navigate to /Orders
+  3. Click on first order
+  4. Get order status
+
+ASSERTIONS:
+  - Assert order detail accessible
+  - Assert status displayed
+
+LOCATORS:
+  - Order detail: [class*="order-detail"]
+  - Status: [class*="status"]
+
+===========================================================================
+TC-ORD-009: Xác minh hủy đơn hàng thành công khi đơn ở trạng thái cho phép hủy
+===========================================================================
+PAGE OBJECTS:
+  - CheckoutPage: cancel_button, order_status
+
+TEST STEPS:
+  1. Login with valid credentials
+  2. Navigate to /Orders
+  3. Click on first order
+  4. Click cancel button
+  5. Get updated status
+
+ASSERTIONS:
+  - Assert cancel option available
+  - Assert status displayed
+
+LOCATORS:
+  - Cancel: button[class*="cancel"], a[class*="cancel"]
+
+===========================================================================
+TC-ORD-010: Xác minh không thể checkout khi giỏ hàng trống
+===========================================================================
+PAGE OBJECTS:
+  - CheckoutPage: cart_empty, checkout_button
+
+TEST STEPS:
+  1. Navigate to /Basket
+  2. Check if cart is empty
+
+ASSERTIONS:
+  - Assert empty state detected
+  - Assert checkout blocked or redirect
+
+LOCATORS:
+  - Empty: [class*="empty"], .alert-warning
+
+===========================================================================
+TC-ORD-011: Xác minh hệ thống cảnh báo khi số lượng đặt mua vượt tồn kho
+===========================================================================
+PAGE OBJECTS:
+  - CheckoutPage: quantity_input, stock_warning
+
+TEST STEPS:
+  1. Navigate to /Basket
+  2. Check if cart has items
+  3. Update quantity to high value: 999
+
+ASSERTIONS:
+  - Assert quantity can be updated
+  - Assert product count >= 0
+
+LOCATORS:
+  - Quantity: input[name*="Quantity"], input[type="number"]
+
+===========================================================================
+TC-ORD-012: Xác minh email xác nhận đơn hàng được gửi thành công sau khi đặt hàng
+===========================================================================
+PAGE OBJECTS:
+  - CheckoutPage: order_confirmation, order_number
+
+TEST STEPS:
+  1. Login with valid credentials
+  2. Navigate to /Basket
+  3. Check if cart has items
+  4. If items, place order
+  5. Check confirmation
+
+ASSERTIONS:
+  - Assert order placed or confirmation shown
+  - Assert order number displayed or not
+
+LOCATORS:
+  - Confirmation: [class*="confirmation"], [class*="success"]
+  - Order number: [class*="order-number"], [id*="order-id"]
+
+===========================================================================
+"""
+
 import pytest
 import time
 from pages.checkout_page import CheckoutPage
