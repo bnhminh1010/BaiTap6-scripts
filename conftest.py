@@ -35,3 +35,8 @@ def driver():
     browser.implicitly_wait(Config.TIMEOUT) # Dùng timeout từ config
     yield browser
     browser.quit()
+
+@pytest.fixture()
+def wait(driver):
+    from selenium.webdriver.support.ui import WebDriverWait
+    return WebDriverWait(driver, 10)
