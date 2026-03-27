@@ -142,3 +142,13 @@ class CatalogPage(BasePage):
             return pager.text if pager else ""
         except:
             return ""
+
+    def add_product_to_cart(self, index=0):
+        """Thêm sản phẩm vào giỏ từ catalog theo index"""
+        try:
+            products = self.driver.find_elements(*self.PRODUCT_ITEM)
+            if index < len(products):
+                add_btn = products[index].find_element(By.CSS_SELECTOR, "input.esh-catalog-button")
+                add_btn.click()
+        except:
+            pass

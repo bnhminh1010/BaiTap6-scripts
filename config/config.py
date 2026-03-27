@@ -1,6 +1,6 @@
 class Config:
     # URL của ứng dụng Web đang chạy
-    BASE_URL = "http://localhost:5001"
+    BASE_URL = "https://localhost:5001"
 
     # Thời gian chờ mặc định cho Explicit Wait
     TIMEOUT = 10
